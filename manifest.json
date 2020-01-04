@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Time Tracker",
+  "version": "0.1",
+  "description": "Hides suggested videos on YouTube as well as tracks time spent on unproductive websites.",
+  // "icons": { },
+  "permissions":[
+    "webNavigation",
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["hide.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  }
+}
