@@ -9,6 +9,9 @@ var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
 /* Listen for when a tab is updated (ex: changed URL). */
 chrome.tabs.onUpdated.addListener(tabUpdated);
 
+/* Listen for when the active tab is changed. */
+chrome.tabs.onActivated.addListener(tabActivated);
+
 /* Sends a message to clean YouTube if on a YouTube website. */
 function historyUpdated(historyDetails) {
   console.log("You are now on: " + historyDetails.url);
@@ -23,19 +26,37 @@ function historyUpdated(historyDetails) {
   }
 }
 
+
+/********************
+YOUTUBE TIMER METHODS
+********************/
+
 /* Fired when a tab is updated (ex: by URL). */
 function tabUpdated(tabId, changeInfo, tab) {
   console.log("A tab was updated!");
   if (youtubeURL.test(tab.url)) {
     if (!timer.running) {
-      runTimer();
+      startTimer();
     }
   } else if (timer.running) {
     stopTimer();
   }
 }
 
-function runTimer() {
+/* Fired when the active tab is changed.
+** If the activated tab is not on YouTube, stop the timer.
+*/
+function tabActivated(activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, (tab) => {
+    if (!youtubeURL.test(tab.url)) {
+      stopTimer();
+    } else {
+      startTimer();
+    }
+  });
+}
+
+function startTimer() {
   if (timer.running == false) {
     console.log("Starting timer");
     timer.running = true;
