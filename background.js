@@ -5,6 +5,14 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
 
 /* A regular expression that matches websites under the YouTube domain. */
 var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
+/* A regular expression that matches the YouTube home page. */
+var youtubeHome = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/$/;
+/* A regular expression that matches the YouTube trending page. */
+var youtubeTrending = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/trending/;
+/* A regular expression that matches the YouTube subscription page. */
+var subsPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/subscriptions/;
+/* A regular expression that matches a YouTube video page. */
+var videoPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/watch/;
 
 /* Listen for when a tab is updated (ex: changed URL). */
 chrome.tabs.onUpdated.addListener(tabUpdated);
@@ -14,18 +22,23 @@ chrome.tabs.onActivated.addListener(tabActivated);
 
 /* Sends a message to clean YouTube if on a YouTube website. */
 function historyUpdated(historyDetails) {
+  console.log("History state updated!");
   console.log("You are now on: " + historyDetails.url);
-  //console.log("Tab ID: " + historyDetails.tabId);
-  if (youtubeURL.test(historyDetails.url)) {
-    //console.log("YouTube page detected!");
-    console.log("Sending cleanYouTube message");
-    // Sends a message with txt "cleanYouTube" to the current tab
-    chrome.tabs.sendMessage(historyDetails.tabId, {txt: "cleanYouTube"});
-  } else {
-    console.log("Not a YouTube page");
-  }
+  cleanYouTubeMessage(historyDetails.url, historyDetails.tabId);
 }
 
+// Sends the appropriate message for cleaning YouTube if url matches
+function cleanYouTubeMessage(url, tabId) {
+  if (videoPage.test(url)) {
+    console.log("Sending cleanSidebar message");
+    // Sends a message to be accepted by hide.js
+    chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
+  }
+  if (youtubeHome.test(url) || youtubeTrending.test(url)) {
+    console.log("Sending cleanRecc message");
+    chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
+  }
+}
 
 /********************
 YOUTUBE TIMER METHODS
@@ -34,7 +47,9 @@ YOUTUBE TIMER METHODS
 /* Fired when a tab is updated (ex: by URL). */
 function tabUpdated(tabId, changeInfo, tab) {
   console.log("A tab was updated!");
+  cleanYouTubeMessage(tab.url, tabId);
   if (youtubeURL.test(tab.url)) {
+
     if (!timer.running) {
       startTimer();
     }

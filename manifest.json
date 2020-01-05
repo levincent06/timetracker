@@ -9,7 +9,8 @@
     "tabs"
   ],
   "browser_action": {
-    "default_title": "Hi it's me"
+    "default_title": "Time Tracker",
+    "default_popup": "popup.js"
   },
   "content_scripts": [
     {
