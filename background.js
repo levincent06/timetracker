@@ -60,6 +60,7 @@ function startTimer() {
   if (timer.running == false) {
     console.log("Starting timer");
     timer.running = true;
+    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0033"}); // Red
     timer.interval = setInterval(() => {timer.timeSpent += 1;
                                         updateBadge(timer.timeSpent);}, 1000);
   } else {
@@ -70,6 +71,7 @@ function startTimer() {
 function stopTimer() {
   console.log("Stopping timer");
   timer.running = false;
+  chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
   clearInterval(timer.interval);
 }
 
@@ -86,15 +88,5 @@ let timer = {
 
 /* Updates the extension badge number to N. */
 function updateBadge(n) {
-  let color;
-  if (n < 10) {
-    color = "#99FF99"; // Green
-  } else if (n < 20) {
-    color = "#FFCC99"; // Orange
-  } else {
-    color = "#FF0033"; // Red
-  }
-  // https://stackoverflow.com/questions/8894461/updating-an-extension-button-dynamically-inspiration-required
-  chrome.browserAction.setBadgeBackgroundColor({color: color});
   chrome.browserAction.setBadgeText({text: n.toString()});
 }
