@@ -8,6 +8,9 @@
     "webNavigation",
     "tabs"
   ],
+  "browser_action": {
+    "default_title": "Hi it's me"
+  },
   "content_scripts": [
     {
       "matches": [

@@ -1,11 +1,11 @@
 /*
 ** A content script that listens for a "cleanYouTube" message, then hides suggested videos on YouTube.
 */
-console.log("Content script ready");
+console.log("Hide script ready!");
 chrome.runtime.onMessage.addListener(messageReceived);
 
 function messageReceived(message, sender, sendResponse) {
-  console.log("Message received!");
+  console.log("hide.js received a message!: " + message.txt);
   if (message.txt == "cleanYouTube") {
     cleanYouTube();
   }
