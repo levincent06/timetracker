@@ -6,7 +6,8 @@
   // "icons": { },
   "permissions":[
     "webNavigation",
-    "tabs"
+    "tabs",
+    "storage"
   ],
   "browser_action": {
     "default_title": "Time Tracker"

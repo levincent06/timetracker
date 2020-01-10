@@ -1,8 +1,5 @@
 console.log("Background script ready!");
 
-/* Listen for page changes within the YouTube domain. */
-chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
-
 /* A regular expression that matches websites under the YouTube domain. */
 var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
 /* A regular expression that matches the YouTube home page. */
@@ -14,18 +11,56 @@ var subsPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/subscriptions/;
 /* A regular expression that matches a YouTube video page. */
 var videoPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/watch/;
 
+/**************
+EVENT LISTENERS
+**************/
+
+/* Listen for page changes within the YouTube domain. */
+chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
+
+/* Sends a message to clean YouTube if on a YouTube website. */
+function historyUpdated(historyDetails) {
+  console.log("History state updated to "  + historyDetails.url);
+  cleanYouTubeMessage(historyDetails.url, historyDetails.tabId);
+}
+
 /* Listen for when a tab is updated (ex: changed URL). */
 chrome.tabs.onUpdated.addListener(tabUpdated);
+
+/* Fired when a tab is updated (ex: by URL). */
+function tabUpdated(tabId, changeInfo, tab) {
+  console.log("A tab was updated to " + tab.url);
+  cleanYouTubeMessage(tab.url, tabId);
+  updateTimerState(tab.url);
+}
 
 /* Listen for when the active tab is changed. */
 chrome.tabs.onActivated.addListener(tabActivated);
 
-/* Sends a message to clean YouTube if on a YouTube website. */
-function historyUpdated(historyDetails) {
-  console.log("History state updated!");
-  console.log("You are now on: " + historyDetails.url);
-  cleanYouTubeMessage(historyDetails.url, historyDetails.tabId);
+/* Fired when the active tab is changed.
+** If the activated tab is not on YouTube, stop the timer.
+*/
+function tabActivated(activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, (tab) => {
+    updateTimerState(tab.url);
+  });
 }
+
+/* Listen for when a window is closed. */
+chrome.windows.onRemoved.addListener(windowClosed);
+
+/* Fired when a window is closed.
+** If a window is closed, stop the timer.
+*/
+function windowClosed(windowId) {
+  console.log("Window was closed!");
+  stopTimer();
+}
+
+
+/****************************
+CORE CONTENT SCRIPT MESSENGER
+****************************/
 
 // Sends the appropriate message for cleaning YouTube if url matches
 function cleanYouTubeMessage(url, tabId) {
@@ -44,31 +79,43 @@ function cleanYouTubeMessage(url, tabId) {
 YOUTUBE TIMER METHODS
 ********************/
 
-/* Fired when a tab is updated (ex: by URL). */
-function tabUpdated(tabId, changeInfo, tab) {
-  console.log("A tab was updated!");
-  cleanYouTubeMessage(tab.url, tabId);
-  if (youtubeURL.test(tab.url)) {
+/* An object that keeps track of the states of the timer
+** running: A boolean value indicating whether the timer is running.
+** timeSpent: An int value in seconds
+** interval: A variable to hold intervals to increment the timeSpent
+*/
+let timer = {
+  running : false,
+  timeSpent : 0,
+  interval : null
+};
 
-    if (!timer.running) {
-      startTimer();
-    }
-  } else if (timer.running) {
-    stopTimer();
-  }
+console.log("Before loading timeSpent: " + timer.timeSpent);
+console.log("Saved timeSpent: " + chrome.storage.sync.get([today()], (result) => {}));
+chrome.storage.sync.get([today()], (result) => {
+              timer.timeSpent = result.key || 0});
+console.log("After loading timeSpent: " + timer.timeSpent);
+
+function today() {
+  let date = new Date();
+  let m = date.getUTCMonth().toString();
+  let d = date.getUTCDate().toString();
+  let y = date.getUTCFullYear().toString();
+  return m + "/" + d + "/" + y;
 }
 
-/* Fired when the active tab is changed.
-** If the activated tab is not on YouTube, stop the timer.
-*/
-function tabActivated(activeInfo) {
-  chrome.tabs.get(activeInfo.tabId, (tab) => {
-    if (!youtubeURL.test(tab.url)) {
-      stopTimer();
-    } else {
-      startTimer();
-    }
-  });
+function storeTimer() {
+  let key = today();
+  let newTimeSpent = timer.timeSpent;
+  chrome.storage.sync.set({key: newTimeSpent}, () => {});
+}
+
+function updateTimerState(url) {
+  if (!youtubeURL.test(url) && timer.running) {
+    stopTimer();
+  } else if (youtubeURL.test(url) && !timer.running){
+    startTimer();
+  }
 }
 
 function startTimer() {
@@ -85,23 +132,19 @@ function startTimer() {
 
 function stopTimer() {
   console.log("Stopping timer");
+  storeTimer();
   timer.running = false;
   chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
   clearInterval(timer.interval);
 }
 
-/* An object that keeps track of the states of the timer
-** running: A boolean value indicating whether the timer is running.
-** timeSpent: An int value in seconds
-** interval: A variable to hold intervals to increment the timeSpent
-*/
-let timer = {
-  running : false,
-  timeSpent : 0,
-  interval : null
-};
 
 /* Updates the extension badge number to N. */
 function updateBadge(n) {
+  const minutesAlertInterval = 1;
+  let timeSpentMinutes = n / 60;
   chrome.browserAction.setBadgeText({text: n.toString()});
+  if (timeSpentMinutes % minutesAlertInterval == 0) {
+    window.alert(`You've spent ${timeSpentMinutes} minutes on YouTube today.`)
+  }
 }

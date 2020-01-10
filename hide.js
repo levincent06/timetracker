@@ -7,8 +7,10 @@ chrome.runtime.onMessage.addListener(messageReceived);
 function messageReceived(message, sender, sendResponse) {
   console.log("hide.js received a message!: " + message.txt);
   if (message.txt == "cleanSidebar") {
+    console.log("cleanSidebar received!");
     cleanSidebar();
   } else if (message.txt == "cleanRecc") {
+    console.log("cleanRecc received!");
     cleanRecc();
   }
 }
@@ -24,7 +26,7 @@ function cleanSidebar() {
 
 function cleanRecc() {
   // Clears recommended videos on the front page and subscription page
-  console.log("cleanRecc received!");
+  console.log("Removing stuff");
   const reccVids = document.getElementsByClassName("ytd-page-manager");
   for (var vid of reccVids) {
     vid.remove();
