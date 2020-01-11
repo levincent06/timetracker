@@ -1,5 +1,15 @@
 console.log("Background script ready!");
 
+/************
+USER SETTINGS
+************/
+
+
+
+/*****************
+URL MATCHING REGEX
+*****************/
+
 /* A regular expression that matches websites under the YouTube domain. */
 var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
 /* A regular expression that matches the YouTube home page. */
@@ -157,12 +167,24 @@ function stopTimer() {
 }
 
 
-/* Updates the extension badge number to N. */
+/** Updates the extension badge number to N. */
 function updateBadge(n) {
-  const minutesAlertInterval = 10;
+  const minutesAlertInterval = 1;
   let timeSpentMinutes = n / 60;
   chrome.browserAction.setBadgeText({text: n.toString()});
   if (timeSpentMinutes % minutesAlertInterval == 0) {
-    window.alert(`You've spent ${timeSpentMinutes} minutes on YouTube today.`)
+    notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
   }
+}
+
+/** Sends a notification to the user with string S. */
+function notify(s) {
+  var options = {
+    type : "basic",
+    title : "YouTube Tracker",
+    message : "hi",
+    iconUrl : "icon.png",
+    silent : true
+  }
+  chrome.notifications.create(options);
 }
