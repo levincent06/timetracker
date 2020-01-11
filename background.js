@@ -65,12 +65,12 @@ CORE CONTENT SCRIPT MESSENGER
 // Sends the appropriate message for cleaning YouTube if url matches
 function cleanYouTubeMessage(url, tabId) {
   if (videoPage.test(url)) {
-    console.log("Sending cleanSidebar message");
+    console.log("Sending cleanSidebar message for " + url);
     // Sends a message to be accepted by hide.js
     chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
   }
   if (youtubeHome.test(url) || youtubeTrending.test(url)) {
-    console.log("Sending cleanRecc message");
+    console.log("Sending cleanRecc message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
   }
 }
@@ -90,26 +90,42 @@ let timer = {
   interval : null
 };
 
-console.log("Before loading timeSpent: " + timer.timeSpent);
-console.log("Saved timeSpent: " + chrome.storage.sync.get([today()], (result) => {}));
-chrome.storage.sync.get([today()], (result) => {
-              timer.timeSpent = result.key || 0});
-console.log("After loading timeSpent: " + timer.timeSpent);
+/** Updates the timer to the saved time for the UTC day. */
+chrome.storage.sync.get(today(), (result) => {
+              console.log("Saved time spent: " + result[today()]);
+              timer.timeSpent = result[today()] || 0
+              console.log("Time spent loaded to " + timer.timeSpent);});
 
+/** Return a string form of today's date based on the user's OS timezone.
+** Ex: January 7, 2020 === x010720. */
 function today() {
   let date = new Date();
-  let m = date.getUTCMonth().toString();
-  let d = date.getUTCDate().toString();
-  let y = date.getUTCFullYear().toString();
-  return m + "/" + d + "/" + y;
+  let m = date.getMonth() + 1;
+  m = m.toString();
+  if (m.length == 1) {
+    m = "0" + m;
+  }
+  let d = date.getDate().toString();
+  if (d.length == 1) {
+    d = "0" + d;
+  }
+  let y = date.getFullYear().toString();
+  y = y.substring(2);
+  return "x" + m + d + y;
 }
 
+/** Stores the timer state for later retrieval in the form
+**  day : timeSpent */
 function storeTimer() {
-  let key = today();
-  let newTimeSpent = timer.timeSpent;
-  chrome.storage.sync.set({key: newTimeSpent}, () => {});
+  let date = today();
+  console.log("Today's date is " + date);
+  console.log("Storing " + timer.timeSpent);
+  chrome.storage.sync.set({[date]: timer.timeSpent});
+  chrome.storage.sync.get(date, (result) => {
+                console.log("Successfuly stored " + result[date])});
 }
 
+/** Stops or starts the timer based on the current URL. */
 function updateTimerState(url) {
   if (!youtubeURL.test(url) && timer.running) {
     stopTimer();
@@ -118,6 +134,7 @@ function updateTimerState(url) {
   }
 }
 
+/** Starts the timer. Running is set to true and timeSpent periodically increases. */
 function startTimer() {
   if (timer.running == false) {
     console.log("Starting timer");
@@ -130,6 +147,7 @@ function startTimer() {
   }
 }
 
+/** Stops the timer. Running is set to false and the timerSpent stops increasing. */
 function stopTimer() {
   console.log("Stopping timer");
   storeTimer();
@@ -141,7 +159,7 @@ function stopTimer() {
 
 /* Updates the extension badge number to N. */
 function updateBadge(n) {
-  const minutesAlertInterval = 1;
+  const minutesAlertInterval = 10;
   let timeSpentMinutes = n / 60;
   chrome.browserAction.setBadgeText({text: n.toString()});
   if (timeSpentMinutes % minutesAlertInterval == 0) {
