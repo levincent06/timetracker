@@ -9,6 +9,8 @@ USER SETTINGS
 let hideRecc = true;
 /* Whether or not to hide sideBar videos. */
 let hideSidebar = true;
+/* Whether or not to show the time on the badge. */
+let showNumber = false;
 /* Whether to show seconds or minutes on the badge. */
 let timeunit = "minutes";
 /* Whether or not to show notifications. */
@@ -19,15 +21,19 @@ let minutesAlertInterval = 1;
 let silent = true;
 
 /* Update the options html to have the previously saved options. */
-chrome.storage.sync.get(["hideRecc", "hideSidebar", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
-  (data) => {
-    hideRecc = data.hideRecc;
-    hideSidebar = data.hideSidebar;
-    timeunit = data.timeunit;
-    showNotifications = data.showNotifications;
-    minutesAlertInterval = data.minutesAlertInterval;
-    silent = data.silent;
-  })
+function updateSettings() {
+  chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
+    (data) => {
+      hideRecc = data.hideRecc;
+      hideSidebar = data.hideSidebar;
+      showNumber = data.showNumber;
+      timeunit = data.timeunit;
+      showNotifications = data.showNotifications;
+      minutesAlertInterval = data.minutesAlertInterval;
+      silent = data.silent;
+    })
+}
+updateSettings();
 
 /*****************
 URL MATCHING REGEX
@@ -52,15 +58,7 @@ chrome.runtime.onMessage.addListener(messageReceived);
 
 function messageReceived(request, sender, sendResponse) {
   if (request.txt === "savedOptions") {
-    chrome.storage.sync.get(["hideRecc", "hideSidebar", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
-      (data) => {
-        hideRecc = data.hideRecc;
-        hideSidebar = data.hideSidebar;
-        timeunit = data.timeunit;
-        showNotifications = data.showNotifications;
-        minutesAlertInterval = data.minutesAlertInterval;
-        silent = data.silent;
-      })
+    updateSettings();
   }
 }
 
@@ -78,9 +76,11 @@ chrome.tabs.onUpdated.addListener(tabUpdated);
 
 /* Fired when a tab is updated (ex: by URL). */
 function tabUpdated(tabId, changeInfo, tab) {
-  console.log("A tab was updated to " + tab.url);
-  cleanYouTubeMessage(tab.url, tabId);
-  updateTimerState(tab.url);
+  if (changeInfo.status === "complete") {
+    console.log("A tab was updated to " + tab.url);
+    cleanYouTubeMessage(tab.url, tabId);
+    updateTimerState(tab.url);
+  }
 }
 
 /* Listen for when the active tab is changed. */
@@ -106,7 +106,6 @@ function windowClosed(windowId) {
   stopTimer();
 }
 
-
 /****************************
 CORE CONTENT SCRIPT MESSENGER
 ****************************/
@@ -117,10 +116,12 @@ function cleanYouTubeMessage(url, tabId) {
     console.log("Sending cleanSidebar message for " + url);
     // Sends a message to be accepted by hide.js
     chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
-  }
-  if (hideRecc && (youtubeHome.test(url) || youtubeTrending.test(url))) {
+  } else if (hideRecc && (youtubeHome.test(url) || youtubeTrending.test(url))) {
     console.log("Sending cleanRecc message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
+  } else if (youtubeURL.test(url)) {
+    console.log("Restoring videos on subs page");
+    chrome.tabs.sendMessage(tabId, {txt: "restore"});
   }
 }
 
@@ -170,6 +171,7 @@ function storeTimer() {
   //console.log("Today's date is " + date);
   //console.log("Storing " + timer.timeSpent);
   chrome.storage.sync.set({[date]: timer.timeSpent});
+  chrome.storage.sync.set({"today": timer.timeSpent});
   chrome.storage.sync.get(date, (result) => { console.log("Successfuly stored " + result[date])});
 }
 
@@ -213,7 +215,12 @@ function updateBadge() {
   } else {
     n = timer.timeSpent;
   }
-  chrome.browserAction.setBadgeText({text: n.toString()});
+  if (showNumber) {
+    chrome.browserAction.setBadgeText({text: n.toString()});
+  } else {
+    chrome.browserAction.setBadgeText({text: ""});
+  }
+
   if (timeSpentMinutes % minutesAlertInterval == 0) {
     notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
   }
@@ -228,7 +235,7 @@ function notify(s) {
     type : "basic",
     title : "YouTube Tracker",
     message : s,
-    iconUrl : "icon.png",
+    iconUrl : "icons/icon128.png",
     silent : silent
   }
   chrome.notifications.create(options);

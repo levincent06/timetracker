@@ -11,7 +11,8 @@
   </head>
 
   <body>
-    <h1>Time Tracker Options</h1>
+    <h1>YouTube Tracker Options</h1>
+    <h2>Minutes Spent Today: <span id="timeSpent">0</span> </h2>
     <label>
       <input type="checkbox" id="hideRecc" value="" checked>
       Hide recommended videos on YouTube homepage and Trending.<br>
@@ -22,7 +23,12 @@
       Hide recommended videos on the side bar of YouTube.<br>
     </label>
 
-    What time units should display on the extension badge?
+    <label>
+      <input type="checkbox" id="showNumber" value="" checked>
+      Show a live counter on the extension icon.<br>
+    </label>
+
+    What time units should display on the icon (if enabled above)?
     <select id="timeunit">
         <option value="minutes">minutes</option>
         <option value="seconds">seconds</option>

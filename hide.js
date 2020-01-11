@@ -1,34 +1,45 @@
 /*
-** A content script that listens messages, then hides suggested videos on YouTube.
+** A content script that listens for messages, then hides suggested videos on YouTube.
 */
 console.log("Hide script ready!");
 chrome.runtime.onMessage.addListener(messageReceived);
 
 function messageReceived(message, sender, sendResponse) {
-  console.log("hide.js received a message!: " + message.txt);
   if (message.txt == "cleanSidebar") {
     console.log("cleanSidebar received!");
     cleanSidebar();
   } else if (message.txt == "cleanRecc") {
     console.log("cleanRecc received!");
     cleanRecc();
+  } else if (message.txt == "restore") {
+    console.log("restore received!");
+    restore();
   }
 }
 
+// Clears side bar videos
 function cleanSidebar() {
-  // Clears side bar videos
-  console.log("cleanSidebar received!");
   const sideBar = document.getElementById("related");
   if (sideBar != null) {
-    sideBar.remove();
+    //sideBar.remove();
+    sideBar.style.display = "none";
   }
 }
 
+// Clears recommended videos on the front page and subscription page
 function cleanRecc() {
-  // Clears recommended videos on the front page and subscription page
-  console.log("Removing stuff");
   const reccVids = document.getElementsByClassName("ytd-page-manager");
   for (var vid of reccVids) {
-    vid.remove();
+    //vid.remove();
+    vid.style.display = "none";
+  }
+}
+
+// Restores recommended videos on the front page and subscription page
+function restore() {
+  const reccVids = document.getElementsByClassName("ytd-page-manager");
+  for (var vid of reccVids) {
+    //vid.remove();
+    vid.style.display = "";
   }
 }
