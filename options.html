@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Time Tracker Options</title>
+    <style media="screen">
+      body {
+        width: 450px
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Time Tracker Options</h1>
+    <label>
+      <input type="checkbox" id="hideRecc" value="" checked>
+      Hide recommended videos on YouTube homepage and Trending.<br>
+    </label>
+
+    <label>
+      <input type="checkbox" id="hideSidebar" value="" checked>
+      Hide recommended videos on the side bar of YouTube.<br>
+    </label>
+
+    What time units should display on the extension badge?
+    <select id="timeunit">
+        <option value="minutes">minutes</option>
+        <option value="seconds">seconds</option>
+    </select>
+    <br>
+
+    <label>
+      <input type="checkbox" id="showNotifications" value="" checked>
+      Show desktop notifications reminding you how long you've spent on YouTube.<br>
+    </label>
+
+    How often (in minutes) should a notification be sent (if enabled)?
+    <label>
+      <input type="text" id="minutesAlertInterval" value="60" style="width: 25px">
+    </label>
+    <br>
+
+    <label>
+      <input type="checkbox" id="silent" value="" checked>
+      Make notifications silent (if enabled).
+    </label>
+    <br>
+    <br>
+    <input type="submit" id="saveOptions" value="Save">
+  </body>
+
+  <script type="text/javascript" src="options.js"></script>
+</html>

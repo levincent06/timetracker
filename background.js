@@ -3,8 +3,31 @@ console.log("Background script ready!");
 /************
 USER SETTINGS
 ************/
+/** These values may be set by the user in the extension's options. */
 
+/* Whether or not to hide recommended videos. */
+let hideRecc = true;
+/* Whether or not to hide sideBar videos. */
+let hideSidebar = true;
+/* Whether to show seconds or minutes on the badge. */
+let timeunit = "minutes";
+/* Whether or not to show notifications. */
+let showNotifications = true;
+/* The number of minutes between each notification. */
+let minutesAlertInterval = 1;
+/* Whether or not notifications should be silent. */
+let silent = true;
 
+/* Update the options html to have the previously saved options. */
+chrome.storage.sync.get(["hideRecc", "hideSidebar", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
+  (data) => {
+    hideRecc = data.hideRecc;
+    hideSidebar = data.hideSidebar;
+    timeunit = data.timeunit;
+    showNotifications = data.showNotifications;
+    minutesAlertInterval = data.minutesAlertInterval;
+    silent = data.silent;
+  })
 
 /*****************
 URL MATCHING REGEX
@@ -24,6 +47,22 @@ var videoPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/watch/;
 /**************
 EVENT LISTENERS
 **************/
+
+chrome.runtime.onMessage.addListener(messageReceived);
+
+function messageReceived(request, sender, sendResponse) {
+  if (request.txt === "savedOptions") {
+    chrome.storage.sync.get(["hideRecc", "hideSidebar", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
+      (data) => {
+        hideRecc = data.hideRecc;
+        hideSidebar = data.hideSidebar;
+        timeunit = data.timeunit;
+        showNotifications = data.showNotifications;
+        minutesAlertInterval = data.minutesAlertInterval;
+        silent = data.silent;
+      })
+  }
+}
 
 /* Listen for page changes within the YouTube domain. */
 chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
@@ -74,12 +113,12 @@ CORE CONTENT SCRIPT MESSENGER
 
 // Sends the appropriate message for cleaning YouTube if url matches
 function cleanYouTubeMessage(url, tabId) {
-  if (videoPage.test(url)) {
+  if (hideSidebar && videoPage.test(url)) {
     console.log("Sending cleanSidebar message for " + url);
     // Sends a message to be accepted by hide.js
     chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
   }
-  if (youtubeHome.test(url) || youtubeTrending.test(url)) {
+  if (hideRecc && (youtubeHome.test(url) || youtubeTrending.test(url))) {
     console.log("Sending cleanRecc message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
   }
@@ -128,11 +167,10 @@ function today() {
 **  day : timeSpent */
 function storeTimer() {
   let date = today();
-  console.log("Today's date is " + date);
-  console.log("Storing " + timer.timeSpent);
+  //console.log("Today's date is " + date);
+  //console.log("Storing " + timer.timeSpent);
   chrome.storage.sync.set({[date]: timer.timeSpent});
-  chrome.storage.sync.get(date, (result) => {
-                console.log("Successfuly stored " + result[date])});
+  chrome.storage.sync.get(date, (result) => { console.log("Successfuly stored " + result[date])});
 }
 
 /** Stops or starts the timer based on the current URL. */
@@ -151,7 +189,7 @@ function startTimer() {
     timer.running = true;
     chrome.browserAction.setBadgeBackgroundColor({color: "#FF0033"}); // Red
     timer.interval = setInterval(() => {timer.timeSpent += 1;
-                                        updateBadge(timer.timeSpent);}, 1000);
+                                        updateBadge();}, 1000);
   } else {
     console.log("Timer should already be running");
   }
@@ -167,10 +205,14 @@ function stopTimer() {
 }
 
 
-/** Updates the extension badge number to N. */
-function updateBadge(n) {
-  const minutesAlertInterval = 1;
-  let timeSpentMinutes = n / 60;
+/** Updates the extension badge number. */
+function updateBadge() {
+  let timeSpentMinutes = timer.timeSpent / 60;
+  if (timeunit === "minutes") {
+    n = Math.floor(timeSpentMinutes);
+  } else {
+    n = timer.timeSpent;
+  }
   chrome.browserAction.setBadgeText({text: n.toString()});
   if (timeSpentMinutes % minutesAlertInterval == 0) {
     notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
@@ -179,12 +221,15 @@ function updateBadge(n) {
 
 /** Sends a notification to the user with string S. */
 function notify(s) {
+  if (!showNotifications) {
+    return;
+  }
   var options = {
     type : "basic",
     title : "YouTube Tracker",
-    message : "hi",
+    message : s,
     iconUrl : "icon.png",
-    silent : true
+    silent : silent
   }
   chrome.notifications.create(options);
 }
