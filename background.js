@@ -168,11 +168,8 @@ function today() {
 **  day : timeSpent */
 function storeTimer() {
   let date = today();
-  //console.log("Today's date is " + date);
-  //console.log("Storing " + timer.timeSpent);
   chrome.storage.sync.set({[date]: timer.timeSpent});
-  chrome.storage.sync.set({"today": timer.timeSpent});
-  chrome.storage.sync.get(date, (result) => { console.log("Successfuly stored " + result[date])});
+  //chrome.storage.sync.get(date, (result) => { console.log("Successfuly stored " + result[date])});
 }
 
 /** Stops or starts the timer based on the current URL. */
@@ -190,8 +187,18 @@ function startTimer() {
     console.log("Starting timer");
     timer.running = true;
     chrome.browserAction.setBadgeBackgroundColor({color: "#FF0033"}); // Red
-    timer.interval = setInterval(() => {timer.timeSpent += 1;
-                                        updateBadge();}, 1000);
+    timer.interval = setInterval(runContinuous, 1000);
+    function runContinuous() {
+      // Reset the timer if running through midnight
+      chrome.storage.sync.get(today(), (result) => {
+        if (result[today()] === undefined) {
+          timer.timeSpent = 0;
+        }
+      });
+      timer.timeSpent += 1;
+      storeTimer();
+      updateBadge();
+    }
   } else {
     console.log("Timer should already be running");
   }
@@ -200,7 +207,7 @@ function startTimer() {
 /** Stops the timer. Running is set to false and the timerSpent stops increasing. */
 function stopTimer() {
   console.log("Stopping timer");
-  storeTimer();
+  //storeTimer();
   timer.running = false;
   chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
   clearInterval(timer.interval);

@@ -1,7 +1,25 @@
 document.getElementById("saveOptions").addEventListener("click", save);
 
+/** Return a string form of today's date based on the user's OS timezone.
+** Ex: January 7, 2020 === x010720. */
+function today() {
+  let date = new Date();
+  let m = date.getMonth() + 1;
+  m = m.toString();
+  if (m.length == 1) {
+    m = "0" + m;
+  }
+  let d = date.getDate().toString();
+  if (d.length == 1) {
+    d = "0" + d;
+  }
+  let y = date.getFullYear().toString();
+  y = y.substring(2);
+  return "x" + m + d + y;
+}
+
 /* Update the options html to have the previously saved options. */
-chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "timeunit", "showNotifications", "minutesAlertInterval", "silent", "today"],
+chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "timeunit", "showNotifications", "minutesAlertInterval", "silent", today()],
   (data) => {
     document.getElementById("hideRecc").checked = data.hideRecc;
     document.getElementById("hideSidebar").checked = data.hideSidebar;
@@ -10,7 +28,7 @@ chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "timeunit", "s
     document.getElementById("showNotifications").checked = data.showNotifications;
     document.getElementById("minutesAlertInterval").value = data.minutesAlertInterval;
     document.getElementById("silent").checked = data.silent;
-    document.getElementById("timeSpent").textContent = Math.floor(data.today / 60) + "+";
+    document.getElementById("timeSpent").textContent = Math.floor(data[today()] / 60) + "+";
   })
 
 

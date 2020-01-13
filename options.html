@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <link href="https://fonts.googleapis.com/css?family=Quattrocento+Sans&display=swap" rel="stylesheet">
     <meta charset="utf-8">
     <title>Time Tracker Options</title>
     <style media="screen">
       body {
-        width: 450px
+        width: 450px;
+        font-family: 'Quattrocento Sans', sans-serif;
       }
     </style>
   </head>
@@ -28,23 +30,23 @@
     <h3>Icon Options</h3>
     <label>
       <input type="checkbox" id="showNumber" value="" checked>
-      Show a live counter on the extension icon.<br>
+      Show a live counter on the icon.<br>
     </label>
 
-    What time units should display on the icon (if enabled above)?
+    Icon time units
     <select id="timeunit">
         <option value="minutes">minutes</option>
         <option value="seconds">seconds</option>
     </select>
     <br>
 
-    <h3>Notifcations</h3>
+    <h3>Notifications</h3>
     <label>
       <input type="checkbox" id="showNotifications" value="" checked>
-      Show desktop notifications reminding you how long you've spent on YouTube.<br>
+      Periodic notifications reminding you your time spent.<br>
     </label>
 
-    How often (in minutes) should a notification be sent (if enabled)?
+    Notification frequency (minutes):
     <label>
       <input type="text" id="minutesAlertInterval" value="60" style="width: 25px">
     </label>
@@ -52,7 +54,7 @@
 
     <label>
       <input type="checkbox" id="silent" value="" checked>
-      Make notifications silent (if enabled).
+      Silent notifications
     </label>
     <br>
     <br>
