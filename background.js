@@ -68,7 +68,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
 
 /* Sends a message to clean YouTube if on a YouTube website. */
 function historyUpdated(historyDetails) {
-  console.log("History state updated to "  + historyDetails.url);
+  //console.log("History state updated to "  + historyDetails.url);
   cleanYouTubeMessage(historyDetails.url, historyDetails.tabId);
 }
 
@@ -78,7 +78,7 @@ chrome.tabs.onUpdated.addListener(tabUpdated);
 /* Fired when a tab is updated (ex: by URL). */
 function tabUpdated(tabId, changeInfo, tab) {
   if (changeInfo.status === "complete") {
-    console.log("A tab was updated to " + tab.url);
+    //console.log("A tab was updated to " + tab.url);
     cleanYouTubeMessage(tab.url, tabId);
     updateTimerState(tab.url);
   }
