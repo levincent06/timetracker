@@ -1,4 +1,5 @@
 document.getElementById("saveOptions").addEventListener("click", save);
+document.getElementById("seeData").addEventListener("click", showData);
 
 /** Return a string form of today's date based on the user's OS timezone.
 ** Ex: January 7, 2020 === x010720. */
@@ -56,4 +57,8 @@ function save() {
     txt: "savedOptions"
   }
   chrome.runtime.sendMessage("", message);
+}
+
+function showData() {
+  chrome.tabs.create({url: chrome.extension.getURL("analytics.html")})
 }

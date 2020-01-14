@@ -37,5 +37,5 @@ function secondsToString(seconds) {
   let totalMinutes = Math.round(seconds / 60);
   let hours = Math.floor(totalMinutes / 60);
   let remMinutes = totalMinutes - (hours * 60);
-  return hours + " : " + remMinutes;
+  return hours + ":" + remMinutes;
 }

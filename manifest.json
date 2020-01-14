@@ -17,7 +17,7 @@
   ],
   "browser_action": {
     "default_title": "YouTube Tracker",
-    "default_popup": "analytics.html"
+    "default_popup": "options.html"
   },
   "content_scripts": [
     {
