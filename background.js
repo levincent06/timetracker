@@ -193,7 +193,9 @@ function startTimer() {
         }
       });
       timer.timeSpent += 1;
-      storeTimer();
+      if (timer.timeSpent % 10 == 0) {
+        storeTimer();
+      }
       updateBadge();
     }
   } else {
@@ -204,7 +206,7 @@ function startTimer() {
 /** Stops the timer. Running is set to false and the timerSpent stops increasing. */
 function stopTimer() {
   console.log("Stopping timer");
-  //storeTimer();
+  storeTimer();
   timer.running = false;
   chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
   clearInterval(timer.interval);
