@@ -7,14 +7,19 @@
     <style media="screen">
       body {
         width: 450px;
+        background-color: Black;
+        color: LightGrey;
+        font-family: 'Quattrocento Sans', sans-serif;
+      }
+      select {
         font-family: 'Quattrocento Sans', sans-serif;
       }
     </style>
   </head>
 
   <body>
-    <h1 align="center">YouTube Tracker Options</h1>
-    <h2 align="center">Minutes Spent Today: <span id="timeSpent">0</span> </h2>
+    <h1 align="center">Tracker Options</h1>
+    <h2 align="center">You've spent <span id="timeSpent">0</span> unproductive minutes today.</h2>
 
     <h3>Hide Elements</h3>
     <label>
@@ -48,7 +53,7 @@
 
     Notification frequency (minutes):
     <label>
-      <input type="text" id="minutesAlertInterval" value="60" style="width: 25px">
+      <input type="text" id="minutesAlertInterval" value="60" style="width: 25px; font-family:'Quattrocento Sans'">
     </label>
     <br>
 
@@ -58,7 +63,7 @@
     </label>
     <br>
     <br>
-    <input type="submit" id="saveOptions" value="Save">
+    <input type="submit" id="saveOptions" value="Save" style="font-family:'Quattrocento Sans'">
   </body>
 
   <script type="text/javascript" src="options.js"></script>

@@ -59,6 +59,7 @@ chrome.runtime.onMessage.addListener(messageReceived);
 function messageReceived(request, sender, sendResponse) {
   if (request.txt === "savedOptions") {
     updateSettings();
+    updateBadge();
   }
 }
 
@@ -113,15 +114,11 @@ CORE CONTENT SCRIPT MESSENGER
 // Sends the appropriate message for cleaning YouTube if url matches
 function cleanYouTubeMessage(url, tabId) {
   if (hideSidebar && videoPage.test(url)) {
-    console.log("Sending cleanSidebar message for " + url);
-    // Sends a message to be accepted by hide.js
+    //console.log("Sending cleanSidebar message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
   } else if (hideRecc && (youtubeHome.test(url) || youtubeTrending.test(url))) {
-    console.log("Sending cleanRecc message for " + url);
+    //console.log("Sending cleanRecc message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
-  } else if (youtubeURL.test(url)) {
-    console.log("Restoring videos on subs page");
-    chrome.tabs.sendMessage(tabId, {txt: "restore"});
   }
 }
 
