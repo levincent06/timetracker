@@ -189,7 +189,9 @@ function startTimer() {
       // Reset the timer if running through midnight
       chrome.storage.sync.get(today(), (result) => {
         if (result[today()] === undefined) {
+          console.log("Midnight! Resetting timer.");
           timer.timeSpent = 0;
+          storeTimer();
         }
       });
       timer.timeSpent += 1;
@@ -227,7 +229,7 @@ function updateBadge() {
     chrome.browserAction.setBadgeText({text: ""});
   }
 
-  if (timeSpentMinutes % minutesAlertInterval == 0) {
+  if (Math.floor(timeSpentMinutes) != 0 && Math.floor(timeSpentMinutes) % minutesAlertInterval == 0) {
     notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
   }
 }

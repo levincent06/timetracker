@@ -24,12 +24,12 @@
     <h3>Hide Elements</h3>
     <label>
       <input type="checkbox" id="hideRecc" value="" checked>
-      Hide recommended videos on YouTube homepage and Trending.<br>
+      Hide videos on YouTube Home/Trending/Library.<br>
     </label>
 
     <label>
       <input type="checkbox" id="hideSidebar" value="" checked>
-      Hide recommended videos on the side bar of YouTube.<br>
+      Hide "Up Next" videos.<br>
     </label>
 
     <h3>Icon Options</h3>
@@ -39,7 +39,7 @@
     </label>
 
     Icon time units
-    <select id="timeunit">
+    <select id="timeunit" style="background-color: LightGrey">
         <option value="minutes">minutes</option>
         <option value="seconds">seconds</option>
     </select>
@@ -48,12 +48,12 @@
     <h3>Notifications</h3>
     <label>
       <input type="checkbox" id="showNotifications" value="" checked>
-      Periodic notifications reminding you your time spent.<br>
+      Show periodic notifications reminding you your time spent.<br>
     </label>
 
     Notification frequency (minutes):
     <label>
-      <input type="text" id="minutesAlertInterval" value="60" style="width: 25px; font-family:'Quattrocento Sans'">
+      <input type="text" id="minutesAlertInterval" value="60" style="width: 25px; font-family:'Quattrocento Sans'; border-radius:4px; background-color: LightGrey;">
     </label>
     <br>
 
@@ -63,8 +63,8 @@
     </label>
     <br>
     <br>
-    <input type="submit" id="saveOptions" value="Save" style="font-family:'Quattrocento Sans'">
-    <button type="button" id="seeData">See Data</button>
+    <input type="submit" id="saveOptions" value="Save" style="font-family:'Quattrocento Sans'; border-radius:10px">
+    <button type="button" id="seeData" style="float: right; border-radius:10px">See Data &raquo</button>
   </body>
 
   <script type="text/javascript" src="options.js"></script>
