@@ -141,7 +141,7 @@ chrome.storage.sync.get(today(), (result) => {
               console.log("Time spent loaded to " + timer.timeSpent);});
 
 /** Return a string form of today's date based on the user's OS timezone.
-** Ex: January 7, 2020 === x010720. */
+** Ex: January 7, 2020 === x200107. */
 function today() {
   let date = new Date();
   let m = date.getMonth() + 1;
@@ -155,7 +155,7 @@ function today() {
   }
   let y = date.getFullYear().toString();
   y = y.substring(2);
-  return "x" + m + d + y;
+  return "x" + y + m + d;
 }
 
 /** Stores the timer state for later retrieval in the form
@@ -180,7 +180,7 @@ function startTimer() {
   if (timer.running == false) {
     console.log("Starting timer");
     timer.running = true;
-    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0033"}); // Red
+    chrome.browserAction.setBadgeBackgroundColor({color: "#FF0333"}); // Red
     timer.interval = setInterval(runContinuous, 1000);
     function runContinuous() {
       // Reset the timer if running through midnight

@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "YouTube Tracker",
+  "name": "tracker.pro",
   "version": "0.1",
-  "description": "Hides suggested videos on YouTube as well as tracks time spent on YouTube.",
+  "description": "Hides suggested videos on YouTube as well as tracks time spent on unproductive websites.",
   "options_page": "options.html",
 
   "icons": {
@@ -17,8 +17,8 @@
     "notifications"
   ],
   "browser_action": {
-    "default_title": "YouTube Tracker",
-    "default_popup": "new.html"
+    "default_title": "tracker.pro",
+    "default_popup": "options.html"
   },
   "content_scripts": [
     {

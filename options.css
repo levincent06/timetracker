@@ -1,0 +1,152 @@
+body {
+  width: 300px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.button, body {
+  background-color: white;
+  color: Black;
+  font-family: 'Nunito', sans-serif;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+/* Used for the logo. */
+img {
+  width: 75px;
+  height: 75px;
+  margin: 0px;
+  position: relative;
+  top: 5px;
+  left: 5px;
+}
+
+/* Title. */
+h1 {
+  font-size: 40px;
+  margin: 0px;
+  padding: 0px;
+  font-family: 'Quicksand', sans-sans-serif;
+  display: inline-block;
+  font-weight: bold;
+  color: rgb(160, 222, 145);
+  position: relative;
+  bottom: 20px;
+  left: 10px;
+}
+
+/* Option descriptions. */
+h3 {
+  margin: 10px;
+  padding: 1px;
+  font-weight: lighter;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* The horizontal lines. */
+hr {
+  width: 93%;
+}
+
+.button {
+  width: 50%;
+  height: 30px;
+  border: 0.1px solid Grey;
+  margin: 0px;
+  padding: 0px;
+  float: left;
+  cursor: pointer;
+}
+
+.button span {
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  transition: 0.5s;
+}
+
+/* Insert invisible arrows after the current button text. */
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  right: -30px; /* How far the arrows come in from the right. */
+  transition: 0.5s;
+}
+
+/* Add spacing between text and arrows when hovered. */
+.button:hover span {
+  padding-right: 15px;
+}
+
+/* Make arrows visible. */
+.button:hover span:after {
+  opacity: 1;
+  right: 0px;
+}
+
+/* Credit to w3schools. */
+.switch {
+  float: right;
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 18px;
+  margin: 2px;
+  margin-top: 5px;
+  margin-right: 10px;
+}
+
+/* Hide the underlying checkbox. */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc; /* Light grey */
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 10px;
+}
+
+/* The white circle. */
+.toggle:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* Blue upon checked. */
+input:checked + .toggle {
+  background-color: rgb(145, 192, 250); /* #2196F3 is Dodger Blue */
+}
+
+/* Glow around toggle when clicked. */
+input:focus + .toggle {
+  box-shadow: 0 0 5px rgb(145, 192, 250);
+}
+
+/* The translation when clicked. */
+input:checked + .toggle:before {
+  -webkit-transform: translateX(11.5px);
+  -ms-transform: translateX(11.5px);
+  transform: translateX(11.5px);
+}

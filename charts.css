@@ -1,0 +1,20 @@
+/* A CSS stylesheet to be used for websites.html and analytics.html */
+
+h2 {
+  font-family: 'Quicksand', sans-sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: rgb(160, 222, 145);
+  text-align: center;
+}
+body {
+  width: 275px;
+  font-family: 'Nunito', sans-serif;
+}
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+td {
+  text-align: center;
+}

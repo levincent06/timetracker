@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand|Nunito&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="charts.css">
+  </head>
+  <body>
+    <h2>Add/Remove a website to be tracked</h2>
+    Ex: messenger.com, reddit.com, facebook.com, instagram.com, netflix.com, etc
+    <br>
+    <label>
+      <input type="text" id="websites" value="" style="float: left; width: 100px; font-family:'Nunito', sans-serif;"; border-radius:4px; background-color: LightGrey;">
+    </label>
+    <button type="button" id="add" style="float: left; border-radius:5px">+</button>
+    <button type="button" id="remove" style="float: left; border-radius:5px">-</button>
+    <br>
+    <br>
+    <br>
+    <table style="width:100%" id="datatable">
+      <tr id="tableHeader">
+        <th>Website</th>
+      </tr>
+    </table>
+  </body>
+  <script src="websites.js"></script>
+</html>

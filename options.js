@@ -1,8 +1,14 @@
-document.getElementById("saveOptions").addEventListener("click", save);
-document.getElementById("seeData").addEventListener("click", showData);
+window.onload = function () {
+  /** Add an event listener for each checkbox. */
+  document.querySelectorAll('.switch').forEach(item => {
+    item.firstElementChild.addEventListener('click', save);
+  })
+  document.getElementById("websiteOptions").addEventListener("click", showWebsiteOptions);
+  document.getElementById("showData").addEventListener("click", showData);
+}
 
 /** Return a string form of today's date based on the user's OS timezone.
-** Ex: January 7, 2020 === x010720. */
+** Ex: January 7, 2020 === x200107. */
 function today() {
   let date = new Date();
   let m = date.getMonth() + 1;
@@ -16,7 +22,7 @@ function today() {
   }
   let y = date.getFullYear().toString();
   y = y.substring(2);
-  return "x" + m + d + y;
+  return "x" + y + m + d;
 }
 
 /* Update the options html to have the previously saved options. */
@@ -26,9 +32,9 @@ chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotificat
     document.getElementById("hideSidebar").checked = data.hideSidebar;
     document.getElementById("showNumber").checked = data.showNumber;
     document.getElementById("showNotifications").checked = data.showNotifications;
-    document.getElementById("minutesAlertInterval").value = data.minutesAlertInterval;
+    //document.getElementById("minutesAlertInterval").value = data.minutesAlertInterval || 60;
     document.getElementById("silent").checked = data.silent;
-    document.getElementById("timeSpent").textContent = Math.floor(data[today()] / 60) + "+";
+    document.getElementById("timeSpent").textContent = data[today()] ? (Math.floor(data[today()] / 60) + "+") : "No";
   })
 
 
@@ -38,7 +44,7 @@ function save() {
   var hideSidebar = document.getElementById("hideSidebar").checked;
   var showNumber = document.getElementById("showNumber").checked;
   var showNotifications = document.getElementById("showNotifications").checked;
-  var minutesAlertInterval = document.getElementById("minutesAlertInterval").value;
+  //var minutesAlertInterval = document.getElementById("minutesAlertInterval").value;
   var silent = document.getElementById("silent").checked;
   chrome.storage.sync.set(
     {
@@ -46,7 +52,7 @@ function save() {
       "hideSidebar": hideSidebar,
       "showNumber": showNumber,
       "showNotifications": showNotifications,
-      "minutesAlertInterval": minutesAlertInterval,
+      //"minutesAlertInterval": minutesAlertInterval,
       "silent": silent
     }, () => {console.log("Saved settings.")}
   );
@@ -54,6 +60,10 @@ function save() {
     txt: "savedOptions"
   }
   chrome.runtime.sendMessage("", message);
+}
+
+function showWebsiteOptions() {
+  chrome.tabs.create({url: chrome.extension.getURL("websites.html")})
 }
 
 function showData() {
