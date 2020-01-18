@@ -11,8 +11,6 @@ let hideRecc = true;
 let hideSidebar = true;
 /* Whether or not to show the time on the badge. */
 let showNumber = false;
-/* Whether to show seconds or minutes on the badge. */
-let timeunit = "minutes";
 /* Whether or not to show notifications. */
 let showNotifications = true;
 /* The number of minutes between each notification. */
@@ -22,12 +20,11 @@ let silent = true;
 
 /* Update the options html to have the previously saved options. */
 function updateSettings() {
-  chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "timeunit", "showNotifications", "minutesAlertInterval", "silent"],
+  chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotifications", "minutesAlertInterval", "silent"],
     (data) => {
       hideRecc = data.hideRecc;
       hideSidebar = data.hideSidebar;
       showNumber = data.showNumber;
-      timeunit = data.timeunit;
       showNotifications = data.showNotifications;
       minutesAlertInterval = data.minutesAlertInterval;
       silent = data.silent;
@@ -218,18 +215,14 @@ function stopTimer() {
 /** Updates the extension badge number. */
 function updateBadge() {
   let timeSpentMinutes = timer.timeSpent / 60;
-  if (timeunit === "minutes") {
-    n = Math.floor(timeSpentMinutes);
-  } else {
-    n = timer.timeSpent;
-  }
+  let n = Math.floor(timeSpentMinutes);
   if (showNumber) {
     chrome.browserAction.setBadgeText({text: n.toString()});
   } else {
     chrome.browserAction.setBadgeText({text: ""});
   }
 
-  if (Math.floor(timeSpentMinutes) != 0 && Math.floor(timeSpentMinutes) % minutesAlertInterval == 0) {
+  if (timer.timeSpent != 0 && timeSpentMinutes % minutesAlertInterval == 0) {
     notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
   }
 }
