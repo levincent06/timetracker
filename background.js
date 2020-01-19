@@ -1,5 +1,39 @@
 console.log("Background script ready!");
 
+/*****************
+URL MATCHING REGEX
+*****************/
+/* A regular expression that matches websites under the YouTube domain. */
+var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
+/* A regular expression that matches the YouTube home page. */
+var youtubeHome = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/$/;
+/* A regular expression that matches the YouTube trending page. */
+var youtubeTrending = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/trending/;
+/* A regular expression that matches the YouTube subscription page. */
+var subsPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/subscriptions/;
+/* A regular expression that matches a YouTube video page. */
+var videoPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/watch/;
+
+/* Given a string, return the string with escaped characters for regex purposes. */
+function escape(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/***************
+WEBSITE MATCHING
+***************/
+let websites = [];
+function getWebsites() {
+  chrome.storage.sync.get("websites", (data) => {
+    websites = data["websites"];
+    websites.forEach((item, i) => {
+      websites[i] = new RegExp(escape(websites[i]));
+    });
+    console.log("Loaded websites: " + websites);
+  })
+}
+getWebsites();
+
 /************
 USER SETTINGS
 ************/
@@ -28,24 +62,10 @@ function updateSettings() {
       showNotifications = data.showNotifications;
       minutesAlertInterval = data.minutesAlertInterval;
       silent = data.silent;
+      getWebsites();
     })
 }
 updateSettings();
-
-/*****************
-URL MATCHING REGEX
-*****************/
-
-/* A regular expression that matches websites under the YouTube domain. */
-var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
-/* A regular expression that matches the YouTube home page. */
-var youtubeHome = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/$/;
-/* A regular expression that matches the YouTube trending page. */
-var youtubeTrending = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/trending/;
-/* A regular expression that matches the YouTube subscription page. */
-var subsPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/feed\/subscriptions/;
-/* A regular expression that matches a YouTube video page. */
-var videoPage = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com\/watch/;
 
 /**************
 EVENT LISTENERS
@@ -170,8 +190,14 @@ function storeTimer() {
 function updateTimerState(url) {
   if (!youtubeURL.test(url) && timer.running) {
     stopTimer();
-  } else if (youtubeURL.test(url) && !timer.running){
-    startTimer();
+  } else if (!timer.running) {
+    for (website of websites) {
+      if (website.test(url)) {
+        console.log("Matched " + website + ", starting timer.");
+        startTimer();
+        return;
+      }
+    }
   }
 }
 

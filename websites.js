@@ -24,6 +24,12 @@ function fillData() {
 }
 fillData();
 
+/* A message that tells background.js to update the settings internally. */
+var message = {
+  txt: "savedOptions"
+}
+
+/* Adds the specified website to be tracked. */
 function add() {
   let website = document.getElementById("websites").value;
   chrome.storage.sync.get("websites", (data) => {
@@ -31,11 +37,13 @@ function add() {
     if (!websitesArray.includes(website)) {
       websitesArray.push(website);
       chrome.storage.sync.set({["websites"]: websitesArray});
+      chrome.runtime.sendMessage("", message);
       fillData();
     }
   });
 }
 
+/* Removes the specified website from being tracked. */
 function remove() {
   let website = document.getElementById("websites").value;
   chrome.storage.sync.get("websites", (data) => {
@@ -43,6 +51,7 @@ function remove() {
     if (websitesArray.includes(website)) {
       websitesArray.pop(website);
       chrome.storage.sync.set({["websites"]: websitesArray});
+      chrome.runtime.sendMessage("", message);
       fillData();
     }
   });
