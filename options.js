@@ -1,3 +1,10 @@
+/*
+** The javascript behind options.html, a popup where users can define
+** the core settings.
+** Sends a message to background.js to update the settings.
+** Handles the behavior of the two lower buttons.
+*/
+
 window.onload = function () {
   /** Add an event listener for each checkbox. */
   document.querySelectorAll('.switch').forEach(item => {
@@ -54,8 +61,7 @@ function save() {
       "showNotifications": showNotifications,
       //"minutesAlertInterval": minutesAlertInterval,
       "silent": silent
-    }, () => {console.log("Saved settings.")}
-  );
+    };
   var message = {
     txt: "savedOptions"
   }

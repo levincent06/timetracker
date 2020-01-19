@@ -1,15 +1,13 @@
 /*
 ** A content script that listens for messages, then hides suggested videos on YouTube.
 */
-console.log("Hide script ready!");
+
 chrome.runtime.onMessage.addListener(messageReceived);
 
 function messageReceived(message, sender, sendResponse) {
   if (message.txt == "cleanSidebar") {
-    //console.log("cleanSidebar received!");
     cleanSidebar();
   } else if (message.txt == "cleanRecc") {
-    //console.log("cleanRecc received!");
     cleanRecc();
   }
 }

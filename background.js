@@ -1,8 +1,14 @@
-console.log("Background script ready!");
+/*
+** The core backend script.
+** Involves several event handlers to update the status of the timer.
+** Receives messages from options.js and websites.js to update user-defined options.
+** Sends messages to hide.js to hide YouTube elements
+*/
 
 /*****************
 URL MATCHING REGEX
 *****************/
+
 /* A regular expression that matches websites under the YouTube domain. */
 var youtubeURL = /^https?:\/\/(?:[^./?#]+\.)?youtube\.com/;
 /* A regular expression that matches the YouTube home page. */
@@ -22,7 +28,9 @@ function escape(string) {
 /***************
 WEBSITE MATCHING
 ***************/
+
 let websites = [];
+/* Gets all the websites that need to be tracked shown at websites.html. */
 function getWebsites() {
   chrome.storage.sync.get("websites", (data) => {
     websites = data["websites"];
@@ -37,7 +45,9 @@ getWebsites();
 /************
 USER SETTINGS
 ************/
-/** These values may be set by the user in the extension's options. */
+/* These values may be set by the user in the extension's options.
+** Settings are updated when receiving a message from options.js or websites.js
+*/
 
 /* Whether or not to hide recommended videos. */
 let hideRecc = true;
@@ -52,7 +62,7 @@ let minutesAlertInterval = 1;
 /* Whether or not notifications should be silent. */
 let silent = true;
 
-/* Update the options html to have the previously saved options. */
+/* Update the internal options based on user settings. */
 function updateSettings() {
   chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotifications", "minutesAlertInterval", "silent"],
     (data) => {
@@ -71,8 +81,8 @@ updateSettings();
 EVENT LISTENERS
 **************/
 
+/* Receives "savedOptions" from options.js and websites.js .*/
 chrome.runtime.onMessage.addListener(messageReceived);
-
 function messageReceived(request, sender, sendResponse) {
   if (request.txt === "savedOptions") {
     updateSettings();
@@ -80,22 +90,21 @@ function messageReceived(request, sender, sendResponse) {
   }
 }
 
-/* Listen for page changes within the YouTube domain. */
+/* Listen for page changes within the YouTube domain.
+** Sends a message to clean YouTube if on a YouTube website.
+*/
 chrome.webNavigation.onHistoryStateUpdated.addListener(historyUpdated);
 
-/* Sends a message to clean YouTube if on a YouTube website. */
 function historyUpdated(historyDetails) {
-  //console.log("History state updated to "  + historyDetails.url);
   cleanYouTubeMessage(historyDetails.url, historyDetails.tabId);
 }
 
-/* Listen for when a tab is updated (ex: changed URL). */
+/* Listen for when a tab is updated (ex: changed URL).
+** Send a cleanYouTubeMessage if necessary and update the timer state.
+*/
 chrome.tabs.onUpdated.addListener(tabUpdated);
-
-/* Fired when a tab is updated (ex: by URL). */
 function tabUpdated(tabId, changeInfo, tab) {
   if (changeInfo.status === "complete") {
-    //console.log("A tab was updated to " + tab.url);
     cleanYouTubeMessage(tab.url, tabId);
     updateTimerState(tab.url);
   }
@@ -105,7 +114,7 @@ function tabUpdated(tabId, changeInfo, tab) {
 chrome.tabs.onActivated.addListener(tabActivated);
 
 /* Fired when the active tab is changed.
-** If the activated tab is not on YouTube, stop the timer.
+** Update the timer state accordingly.
 */
 function tabActivated(activeInfo) {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
@@ -113,35 +122,65 @@ function tabActivated(activeInfo) {
   });
 }
 
-/* Listen for when a window is closed. */
+/* Listen for when a window is closed and stop the timer. */
 chrome.windows.onRemoved.addListener(windowClosed);
-
-/* Fired when a window is closed.
-** If a window is closed, stop the timer.
-*/
 function windowClosed(windowId) {
-  console.log("Window was closed!");
   stopTimer();
+}
+
+/*****************
+WINDOW FOCUS CHECK
+*****************/
+
+/* Continuously check whether there is a chrome window currently being focused
+** If so, update the timer state
+** Otherwise, stop the timer.
+*/
+let windowFocusInterval = setInterval(checkFocus, 1000);
+function checkFocus() {
+  chrome.windows.getCurrent(windowChange);
+}
+
+/* When switching between chrome windows, update the timer status as necessary.
+** windowId is the id of the newly-focused window.
+** -1 represents a "null" chrome window.
+*/
+chrome.windows.onFocusChanged.addListener(focusChanged);
+function focusChanged(windowId) {
+  if (windowId != -1) {
+    chrome.windows.get(windowId, windowChange);
+  }
+}
+
+/* If there is no browser focused, stop the timer if it is running.
+** Otherwise if there IS a browser focused, update the timer state.
+*/
+function windowChange(window) {
+  if (timer.running && !window.focused) { // Switched off chromes
+    stopTimer();
+  } else if (window.focused) { // Switching to a chrome
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
+      updateTimerState(tabs[0].url);
+    });
+  }
 }
 
 /****************************
 CORE CONTENT SCRIPT MESSENGER
 ****************************/
 
-// Sends the appropriate message for cleaning YouTube if url matches
+/* Sends the appropriate message to hide.js for cleaning YouTube if url matches. */
 function cleanYouTubeMessage(url, tabId) {
   if (hideSidebar && videoPage.test(url)) {
-    //console.log("Sending cleanSidebar message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanSidebar"});
   } else if (hideRecc && (youtubeHome.test(url) || youtubeTrending.test(url))) {
-    //console.log("Sending cleanRecc message for " + url);
     chrome.tabs.sendMessage(tabId, {txt: "cleanRecc"});
   }
 }
 
-/********************
-YOUTUBE TIMER METHODS
-********************/
+/***********************
+CORE TIMER FUNCTIONALITY
+***********************/
 
 /* An object that keeps track of the states of the timer
 ** running: A boolean value indicating whether the timer is running.
@@ -154,11 +193,9 @@ let timer = {
   interval : null
 };
 
-/** Updates the timer to the saved time for the UTC day. */
+/** Update the timer to the saved time. */
 chrome.storage.sync.get(today(), (result) => {
-              console.log("Saved time spent: " + result[today()]);
-              timer.timeSpent = result[today()] || 0
-              console.log("Time spent loaded to " + timer.timeSpent);});
+              timer.timeSpent = result[today()] || 0;});
 
 /** Return a string form of today's date based on the user's OS timezone.
 ** Ex: January 7, 2020 === x200107. */
@@ -183,22 +220,18 @@ function today() {
 function storeTimer() {
   let date = today();
   chrome.storage.sync.set({[date]: timer.timeSpent});
-  //chrome.storage.sync.get(date, (result) => { console.log("Successfuly stored " + result[date])});
 }
 
 /** Stops or starts the timer based on the current URL. */
 function updateTimerState(url) {
-  if (!youtubeURL.test(url) && timer.running) {
-    stopTimer();
-  } else if (!timer.running) {
-    for (website of websites) {
-      if (website.test(url)) {
-        console.log("Matched " + website + ", starting timer.");
-        startTimer();
-        return;
-      }
+  for (website of websites) {
+    if (website.test(url)) {
+      console.log("Matched " + website + ", starting timer.");
+      startTimer();
+      return;
     }
   }
+  stopTimer();
 }
 
 /** Starts the timer. Running is set to true and timeSpent periodically increases. */
@@ -223,18 +256,18 @@ function startTimer() {
       }
       updateBadge();
     }
-  } else {
-    console.log("Timer should already be running");
   }
 }
 
-/** Stops the timer. Running is set to false and the timerSpent stops increasing. */
+/** Stops the timer and stores it. */
 function stopTimer() {
-  console.log("Stopping timer");
-  storeTimer();
-  timer.running = false;
-  chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
-  clearInterval(timer.interval);
+  if (timer.running) {
+    console.log("Stopping timer");
+    storeTimer();
+    timer.running = false;
+    chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
+    clearInterval(timer.interval);
+  }
 }
 
 
@@ -260,7 +293,7 @@ function notify(s) {
   }
   var options = {
     type : "basic",
-    title : "YouTube Tracker",
+    title : "tracker.pro",
     message : s,
     iconUrl : "icons/icon128.png",
     silent : silent

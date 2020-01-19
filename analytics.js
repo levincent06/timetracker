@@ -1,3 +1,8 @@
+/*
+** The javascript behind analytics.html, a page where users can
+** view their tracked time.
+*/
+
 chrome.storage.sync.get(null, fillData);
 
 /** Populates the html table with the collected data. */

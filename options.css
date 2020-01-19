@@ -1,3 +1,5 @@
+/* A CSS stylesheet to be used for options.html */
+
 body {
   width: 300px;
   padding: 0px;
@@ -73,7 +75,7 @@ hr {
   content: '\00bb';
   position: absolute;
   opacity: 0;
-  right: -30px; /* How far the arrows come in from the right. */
+  right: -25px; /* How far the arrows come in from the right. */
   transition: 0.5s;
 }
 

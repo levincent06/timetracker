@@ -1,3 +1,10 @@
+/*
+** The javascript behind websites.html, a page where users can define what
+** websites they want to be tracked.
+** Sends a message to background.js to update the settings.
+** Updates the html table when adding/removing.
+*/
+
 document.getElementById("add").addEventListener("click", add);
 document.getElementById("remove").addEventListener("click", remove);
 
