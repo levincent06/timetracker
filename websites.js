@@ -56,7 +56,8 @@ function remove() {
   chrome.storage.sync.get("websites", (data) => {
     let websitesArray = data["websites"];
     if (websitesArray.includes(website)) {
-      websitesArray.pop(website);
+      let index = websitesArray.indexOf(website);
+      websitesArray.splice(index, 1);
       chrome.storage.sync.set({["websites"]: websitesArray});
       chrome.runtime.sendMessage("", message);
       fillData();

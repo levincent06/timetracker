@@ -39,7 +39,6 @@ chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotificat
     document.getElementById("hideSidebar").checked = data.hideSidebar;
     document.getElementById("showNumber").checked = data.showNumber;
     document.getElementById("showNotifications").checked = data.showNotifications;
-    //document.getElementById("minutesAlertInterval").value = data.minutesAlertInterval || 60;
     document.getElementById("silent").checked = data.silent;
     document.getElementById("timeSpent").textContent = data[today()] ? (Math.floor(data[today()] / 60) + "+") : "No";
   })
@@ -51,7 +50,6 @@ function save() {
   var hideSidebar = document.getElementById("hideSidebar").checked;
   var showNumber = document.getElementById("showNumber").checked;
   var showNotifications = document.getElementById("showNotifications").checked;
-  //var minutesAlertInterval = document.getElementById("minutesAlertInterval").value;
   var silent = document.getElementById("silent").checked;
   chrome.storage.sync.set(
     {
@@ -59,9 +57,8 @@ function save() {
       "hideSidebar": hideSidebar,
       "showNumber": showNumber,
       "showNotifications": showNotifications,
-      //"minutesAlertInterval": minutesAlertInterval,
       "silent": silent
-    };
+    });
   var message = {
     txt: "savedOptions"
   }

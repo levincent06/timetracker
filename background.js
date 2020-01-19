@@ -37,7 +37,6 @@ function getWebsites() {
     websites.forEach((item, i) => {
       websites[i] = new RegExp(escape(websites[i]));
     });
-    console.log("Loaded websites: " + websites);
   })
 }
 getWebsites();
@@ -58,19 +57,18 @@ let showNumber = false;
 /* Whether or not to show notifications. */
 let showNotifications = true;
 /* The number of minutes between each notification. */
-let minutesAlertInterval = 1;
+let minutesAlertInterval = 60;
 /* Whether or not notifications should be silent. */
 let silent = true;
 
 /* Update the internal options based on user settings. */
 function updateSettings() {
-  chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotifications", "minutesAlertInterval", "silent"],
+  chrome.storage.sync.get(["hideRecc", "hideSidebar", "showNumber", "showNotifications", "silent"],
     (data) => {
       hideRecc = data.hideRecc;
       hideSidebar = data.hideSidebar;
       showNumber = data.showNumber;
       showNotifications = data.showNotifications;
-      minutesAlertInterval = data.minutesAlertInterval;
       silent = data.silent;
       getWebsites();
     })
@@ -126,6 +124,9 @@ function tabActivated(activeInfo) {
 chrome.windows.onRemoved.addListener(windowClosed);
 function windowClosed(windowId) {
   stopTimer();
+  if (windowFocusInterval != null) {
+    clearInterval(windowFocusInterval);
+  }
 }
 
 /*****************
@@ -219,6 +220,11 @@ function today() {
 **  day : timeSpent */
 function storeTimer() {
   let date = today();
+  chrome.storage.sync.get(today(), (result) => {
+    if (result[date] === undefined) {
+      clean();
+    }
+  });
   chrome.storage.sync.set({[date]: timer.timeSpent});
 }
 
@@ -226,7 +232,6 @@ function storeTimer() {
 function updateTimerState(url) {
   for (website of websites) {
     if (website.test(url)) {
-      console.log("Matched " + website + ", starting timer.");
       startTimer();
       return;
     }
@@ -237,7 +242,6 @@ function updateTimerState(url) {
 /** Starts the timer. Running is set to true and timeSpent periodically increases. */
 function startTimer() {
   if (timer.running == false) {
-    console.log("Starting timer");
     timer.running = true;
     chrome.browserAction.setBadgeBackgroundColor({color: "#FF0333"}); // Red
     timer.interval = setInterval(runContinuous, 1000);
@@ -245,7 +249,7 @@ function startTimer() {
       // Reset the timer if running through midnight
       chrome.storage.sync.get(today(), (result) => {
         if (result[today()] === undefined) {
-          console.log("Midnight! Resetting timer.");
+          clean();
           timer.timeSpent = 0;
           storeTimer();
         }
@@ -262,7 +266,6 @@ function startTimer() {
 /** Stops the timer and stores it. */
 function stopTimer() {
   if (timer.running) {
-    console.log("Stopping timer");
     storeTimer();
     timer.running = false;
     chrome.browserAction.setBadgeBackgroundColor({color: "#AAAAAA"}); // Grey
@@ -282,7 +285,7 @@ function updateBadge() {
   }
 
   if (timer.timeSpent != 0 && timeSpentMinutes % minutesAlertInterval == 0) {
-    notify(`You've spent ${timeSpentMinutes} minutes on YouTube today.`);
+    notify(`You've spent ${timeSpentMinutes} minutes unproductively today.`);
   }
 }
 
@@ -300,3 +303,24 @@ function notify(s) {
   }
   chrome.notifications.create(options);
 }
+
+/******************
+STORAGE MAINTENANCE
+******************/
+
+/* Tracked data older than a year will be deleted. */
+function clean() {
+  chrome.storage.sync.get(null, (data) => {
+    var allKeys = Object.keys(data);
+    let now = parseInt(today().substring(1));
+    for (key of allKeys) {
+      if (key.charAt(0) == 'x') {
+        let date = parseInt(key.substring(1));
+        if (now - date > 10000) {
+          chrome.storage.sync.remove(key);
+        }
+      }
+    }
+  });
+}
+clean();
